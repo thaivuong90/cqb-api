@@ -4,62 +4,67 @@ import MailTemplate from "@/app/emails/template";
 import { sendEmail } from "@/app/lib/email";
 import { render } from "@react-email/render";
 
-type User = {
+type UserInfo = {
   displayName?: string;
   email?: string;
   password?: string;
-};
+}
 
-const doSendMail = async (user: User) => {
+const doSendMail = async (user: UserInfo, create: boolean = true) => {
   const { displayName, email, password } = user;
-  if (email && password) {
+  if (email) {
     await sendEmail({
       to: email,
-      subject: "[Rover] You have changed information!",
+      subject: `[Rover] ${create? 'Register was successful' : 'Update was successful'}!`,
       html: render(
         MailTemplate({
-          name: displayName || "Shop",
-          email: email || "",
+          name: displayName || "",
+          email: email,
           password: password || "",
         })
       ),
     });
   }
+};
+
+const makeFormData = (user: any) : UserInfo => {
+  let formData: UserInfo = {};
+  if (user.displayName) formData.displayName = user.displayName;
+  if (user.email) formData.email = user.email;
+  if (user.password) formData.password = user.password;
+  return formData;
 }
 
 export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse
 ) {
-  const userInfo: User = {};
-  const { displayName, email, password } = req.body.user;
-  userInfo.displayName = displayName;
-  if (email) userInfo.email = email;
-  if (password) userInfo.password = password;
   try {
     switch (req.method) {
       case "POST":
-        const rsCreate = await createUser(userInfo);
-        userInfo.email = rsCreate.email;
-        doSendMail(userInfo);
+        let userInfoCreate = makeFormData(req.body.user);
+        const rsCreate = await createUser(userInfoCreate);
+        userInfoCreate.displayName = userInfoCreate.displayName || rsCreate.displayName;
+        userInfoCreate.email = userInfoCreate.email || rsCreate.email;
+        doSendMail(userInfoCreate);
         return res
           .status(200)
-          .json({ message: "Successfully", data: { uid: rsCreate.uid, ...userInfo } });
+          .json({ message: "Successfully", data: { uid: rsCreate.uid } });
       case "PUT":
+        let userInfoUpdate = makeFormData(req.body.user);
         let rsUpdate = null;
         if (req.body.uid) {
-          rsUpdate = await updateUser(req.body.uid, userInfo);
+          rsUpdate = await updateUser(req.body.uid, userInfoUpdate);
         } else {
-          rsUpdate = await createUser(userInfo);
+          rsUpdate = await createUser(userInfoUpdate);
         }
-        userInfo.email = rsUpdate.email;
-        doSendMail(userInfo);
+        userInfoUpdate.displayName =
+          userInfoUpdate.displayName || rsUpdate.displayName;
+        userInfoUpdate.email = userInfoUpdate.email || rsUpdate.email;
+        doSendMail(userInfoUpdate, false);
         return res
           .status(200)
-          .json({
-            message: "Successfully",
-            data: { uid: rsUpdate.uid, ...userInfo },
-          });
+          .json({ message: "Successfully", data: { uid: rsUpdate.uid } });
       case "GET":
         const userRecord = await getUser(req.body.uid);
         return res.status(200).json({ message: userRecord });
