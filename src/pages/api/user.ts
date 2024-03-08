@@ -11,21 +11,27 @@ type UserInfo = {
 }
 
 const doSendMail = async (user: UserInfo, create: boolean = true) => {
-  const { displayName, email, password } = user;
-  if (email) {
-    return await sendEmail({
-      to: email,
-      subject: `[Rover] ${create? 'Register was successful' : 'Update was successful'}!`,
-      html: render(
-        MailTemplate({
-          name: displayName || "",
-          email: email,
-          password: password || "",
-        })
-      ),
-    });
+  try {
+    const { displayName, email, password } = user;
+    if (email) {
+      return await sendEmail({
+        to: email,
+        subject: `[Rover] ${
+          create ? "Register was successful" : "Update was successful"
+        }!`,
+        html: render(
+          MailTemplate({
+            name: displayName || "",
+            email: email,
+            password: password || "",
+          })
+        ),
+      });
+    }
+    return true;
+  } catch(error) {
+    return false;
   }
-  return false;
 };
 
 const makeFormData = (user: any) : UserInfo => {
