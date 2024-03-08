@@ -32,7 +32,7 @@ export default async function handler(
   res: NextApiResponse
 ) {
   const userInfo: User = {};
-  const { displayName, email, password } = req.body;
+  const { displayName, email, password } = req.body.user;
   userInfo.displayName = displayName;
   if (email) userInfo.email = email;
   if (password) userInfo.password = password;
