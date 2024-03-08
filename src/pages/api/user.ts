@@ -46,10 +46,13 @@ export default async function handler(
         const rsCreate = await createUser(userInfoCreate);
         userInfoCreate.displayName = userInfoCreate.displayName || rsCreate.displayName;
         userInfoCreate.email = userInfoCreate.email || rsCreate.email;
-        doSendMail(userInfoCreate);
+        let result = await doSendMail(userInfoCreate);
         return res
           .status(200)
-          .json({ message: "Successfully", data: { uid: rsCreate.uid } });
+          .json({
+            message: "Successfully",
+            data: { uid: rsCreate.uid, sendmail: result },
+          });
       case "PUT":
         let userInfoUpdate = makeFormData(req.body.user);
         let rsUpdate = null;
@@ -61,10 +64,13 @@ export default async function handler(
         userInfoUpdate.displayName =
           userInfoUpdate.displayName || rsUpdate.displayName;
         userInfoUpdate.email = userInfoUpdate.email || rsUpdate.email;
-        doSendMail(userInfoUpdate, false);
+        let result1 = await doSendMail(userInfoUpdate, false);
         return res
           .status(200)
-          .json({ message: "Successfully", data: { uid: rsUpdate.uid } });
+          .json({
+            message: "Successfully",
+            data: { uid: rsUpdate.uid, sendmail: result1 },
+          });
       case "GET":
         const userRecord = await getUser(req.body.uid);
         return res.status(200).json({ message: userRecord });
