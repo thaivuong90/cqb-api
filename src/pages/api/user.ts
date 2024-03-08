@@ -44,7 +44,7 @@ export default async function handler(
         doSendMail(userInfo);
         return res
           .status(200)
-          .json({ message: "Successfully", data: { uid: rsCreate.uid } });
+          .json({ message: "Successfully", data: { uid: rsCreate.uid, ...userInfo } });
       case "PUT":
         let rsUpdate = null;
         if (req.body.uid) {
@@ -56,7 +56,10 @@ export default async function handler(
         doSendMail(userInfo);
         return res
           .status(200)
-          .json({ message: "Successfully", data: { uid: rsUpdate.uid } });
+          .json({
+            message: "Successfully",
+            data: { uid: rsUpdate.uid, ...userInfo },
+          });
       case "GET":
         const userRecord = await getUser(req.body.uid);
         return res.status(200).json({ message: userRecord });
