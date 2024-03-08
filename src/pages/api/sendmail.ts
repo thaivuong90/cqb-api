@@ -3,11 +3,13 @@ import { render } from "@react-email/render";
 import MailTemplate from "@/app/emails/template";
 import { sendEmail } from "@/app/lib/email";
 
+const methods = ["POST", "PUT"];
+
 export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse
 ) {
-  if (req.method === 'POST') {
+  if (req.method && methods.includes(req.method)) {
     await sendEmail({
       to: req.body.to,
       subject: req.body.subject,
