@@ -4,17 +4,23 @@ import MailTemplate from "@/app/emails/template";
 import { sendEmail } from "@/app/lib/email";
 import { render } from "@react-email/render";
 
-const doSendMail = async (user: any) => {
+type User = {
+  displayName?: string;
+  email?: string;
+  password?: string;
+};
+
+const doSendMail = async (user: User) => {
   const { displayName, email, password } = user;
-  if (email) {
+  if (email && password) {
     await sendEmail({
       to: email,
-      subject: "[Rover] You have changed password!",
+      subject: "[Rover] You have changed information!",
       html: render(
         MailTemplate({
-          name: displayName,
-          email: email,
-          password: password,
+          name: displayName || "Shop",
+          email: email || "",
+          password: password || "",
         })
       ),
     });
@@ -25,22 +31,29 @@ export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse
 ) {
+  const userInfo: User = {};
+  const { displayName, email, password } = req.body;
+  userInfo.displayName = displayName;
+  if (email) userInfo.email = email;
+  if (password) userInfo.password = password;
   try {
     switch (req.method) {
       case "POST":
-        const rsCreate = await createUser(req.body.user);
-        doSendMail(req.body.user);
+        const rsCreate = await createUser(userInfo);
+        userInfo.email = rsCreate.email;
+        doSendMail(userInfo);
         return res
           .status(200)
           .json({ message: "Successfully", data: { uid: rsCreate.uid } });
       case "PUT":
         let rsUpdate = null;
         if (req.body.uid) {
-          rsUpdate = await updateUser(req.body.uid, req.body.user);
+          rsUpdate = await updateUser(req.body.uid, userInfo);
         } else {
-          rsUpdate = await createUser(req.body.user);
+          rsUpdate = await createUser(userInfo);
         }
-        doSendMail(req.body.user);
+        userInfo.email = rsUpdate.email;
+        doSendMail(userInfo);
         return res
           .status(200)
           .json({ message: "Successfully", data: { uid: rsUpdate.uid } });

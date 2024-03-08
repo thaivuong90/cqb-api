@@ -10,8 +10,8 @@ export default function MailTemplate(data: MailTemplateProps) {
       <Section style={main}>
         <Container style={container}>
           <Text style={heading}>Welcome {data.name}!</Text>
-          <Text style={paragraph}>Email: {data.email}</Text>
-          <Text style={paragraph}>Password: {data.password}</Text>
+          {data.email  && <Text style={paragraph}>Email: {data.email}</Text>}
+          {data.password && <Text style={paragraph}>Password: {data.password}</Text>}
         </Container>
       </Section>
     </Html>
