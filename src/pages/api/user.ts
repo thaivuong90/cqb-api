@@ -35,9 +35,10 @@ const doSendMail = async (user: UserInfo, create: boolean = true) => {
   }
 };
 
-const doSendMailApi = (user: UserInfo, create: boolean = true) => {
+const doSendMailApi = async (user: UserInfo, create: boolean = true) => {
   const url = "https://cqb-send-mail.vercel.app";
-  axios.post(
+  // const url = "http://localhost:3001";
+  const res = await axios.post(
     url,
     { name: user.displayName, email: user.email, password: user.password },
     {
@@ -46,6 +47,8 @@ const doSendMailApi = (user: UserInfo, create: boolean = true) => {
       },
     }
   );
+
+  return res.status === 200 ? true : false;
 };
 
 const makeFormData = (user: any): UserInfo => {
@@ -69,7 +72,7 @@ export default async function handler(
           userInfoCreate.displayName || rsCreate.displayName;
         userInfoCreate.email = userInfoCreate.email || rsCreate.email;
         // await doSendMail(userInfoCreate);
-        doSendMailApi(userInfoCreate);
+        await doSendMailApi(userInfoCreate);
         return res.status(200).json({
           message: "Successfully",
           data: { uid: rsCreate.uid },
@@ -86,7 +89,7 @@ export default async function handler(
           userInfoUpdate.displayName || rsUpdate.displayName;
         userInfoUpdate.email = userInfoUpdate.email || rsUpdate.email;
         // await doSendMail(userInfoUpdate, false);
-        doSendMailApi(userInfoUpdate);
+        await doSendMailApi(userInfoUpdate);
         return res.status(200).json({
           message: "Successfully",
           data: { uid: rsUpdate.uid },
