@@ -88,8 +88,8 @@ export default async function handler(
         userInfoUpdate.displayName =
           userInfoUpdate.displayName || rsUpdate.displayName;
         userInfoUpdate.email = userInfoUpdate.email || rsUpdate.email;
-        // await doSendMail(userInfoUpdate, false);
-        await doSendMailApi(userInfoUpdate);
+        await doSendMail(userInfoUpdate, false);
+        // await doSendMailApi(userInfoUpdate);
         return res.status(200).json({
           message: "Successfully",
           data: { uid: rsUpdate.uid },
@@ -101,6 +101,8 @@ export default async function handler(
         return res.status(200).json({ message: req.method });
     }
   } catch (error: any) {
-    return res.status(500).json({ code: error.code, message: error.message });
+    return res
+      .status(error.code)
+      .json({ code: error.code, message: error.message });
   }
 }
