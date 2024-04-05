@@ -101,8 +101,17 @@ export default async function handler(
         return res.status(200).json({ message: req.method });
     }
   } catch (error: any) {
+    const { errorInfo } = error;
+    console.log("errorInfo ====> ", errorInfo);
+    if (errorInfo) {
+      return res.status(500).json({
+        code: errorInfo.code,
+        message: errorInfo.message,
+      });
+    }
+
     return res
-      .status(error.code)
-      .json({ code: error.code, message: error.message });
+      .status(500)
+      .json({ message: error.message });
   }
 }
