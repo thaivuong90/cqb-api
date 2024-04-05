@@ -71,8 +71,8 @@ export default async function handler(
         userInfoCreate.displayName =
           userInfoCreate.displayName || rsCreate.displayName;
         userInfoCreate.email = userInfoCreate.email || rsCreate.email;
-        // await doSendMail(userInfoCreate);
-        await doSendMailApi(userInfoCreate);
+        await doSendMail(userInfoCreate);
+        // await doSendMailApi(userInfoCreate);
         return res.status(200).json({
           message: "Successfully",
           data: { uid: rsCreate.uid },
