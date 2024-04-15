@@ -30,4 +30,14 @@ const updateUser = async (uid: string, user: UserInfo) => {
 const createUser = async (user: UserInfo) => {
   return await getAuth().createUser(user);
 };
-export { getUser, updateUser, createUser };
+
+const checkPhoneExistence = async (phone: string) => {
+  try {
+    let result = await getAuth().getUserByPhoneNumber(phone);
+    return result.uid ? true : false;
+  } catch(err) {
+    return false;
+  }
+  
+}
+export { getUser, updateUser, createUser, checkPhoneExistence };

@@ -1,5 +1,5 @@
 import type { NextApiRequest, NextApiResponse } from "next";
-import { updateUser, createUser, getUser } from "@/app/lib/firebase";
+import { updateUser, createUser, getUser, checkPhoneExistence } from "@/app/lib/firebase";
 import MailTemplate from "@/app/emails/template";
 import { sendEmail } from "@/app/lib/email";
 import { render } from "@react-email/render";
@@ -9,11 +9,13 @@ type UserInfo = {
   displayName?: string;
   email?: string;
   password?: string;
+  phoneNumber?: string;
 };
 
 const doSendMail = async (user: UserInfo, create: boolean = true) => {
   try {
     const { displayName, email, password } = user;
+    if (!email && !password) return true;
     if (email) {
       return await sendEmail({
         to: email,
@@ -35,29 +37,18 @@ const doSendMail = async (user: UserInfo, create: boolean = true) => {
   }
 };
 
-const doSendMailApi = async (user: UserInfo, create: boolean = true) => {
-  const url = "https://cqb-send-mail.vercel.app";
-  // const url = "http://localhost:3001";
-  const res = await axios.post(
-    url,
-    { name: user.displayName, email: user.email, password: user.password },
-    {
-      headers: {
-        "Content-Type": "application/json",
-      },
-    }
-  );
-
-  return res.status === 200 ? true : false;
-};
-
 const makeFormData = (user: any): UserInfo => {
   let formData: UserInfo = {};
   if (user.displayName) formData.displayName = user.displayName;
   if (user.email) formData.email = user.email;
   if (user.password) formData.password = user.password;
+  if (user.phoneNumber) formData.phoneNumber = formatPhone(user.phoneNumber);
   return formData;
 };
+
+const formatPhone = (phone: any) => {
+  return phone.replace(phone.charAt(0), "+84");
+}
 
 export default async function handler(
   req: NextApiRequest,
@@ -72,7 +63,6 @@ export default async function handler(
           userInfoCreate.displayName || rsCreate.displayName;
         userInfoCreate.email = userInfoCreate.email || rsCreate.email;
         await doSendMail(userInfoCreate);
-        // await doSendMailApi(userInfoCreate);
         return res.status(200).json({
           message: "Successfully",
           data: { uid: rsCreate.uid },
@@ -89,12 +79,16 @@ export default async function handler(
           userInfoUpdate.displayName || rsUpdate.displayName;
         userInfoUpdate.email = userInfoUpdate.email || rsUpdate.email;
         await doSendMail(userInfoUpdate, false);
-        // await doSendMailApi(userInfoUpdate);
         return res.status(200).json({
           message: "Successfully",
           data: { uid: rsUpdate.uid },
         });
       case "GET":
+        const {phoneNumber} = req.query;
+        if (phoneNumber) {
+          const result = await checkPhoneExistence(formatPhone(phoneNumber));
+          return res.status(200).json({ data: { existence: result }});
+        }
         const userRecord = await getUser(req.body.uid);
         return res.status(200).json({ message: userRecord });
       default:
