@@ -1,5 +1,5 @@
 import type { NextApiRequest, NextApiResponse } from "next";
-import { updateUser, createUser, getUser, checkPhoneExistence } from "@/app/lib/firebase";
+import { updateUser, createUser, getUser, checkPhoneExistence, deleteUser } from "@/app/lib/firebase";
 import MailTemplate from "@/app/emails/template";
 import { sendEmail } from "@/app/lib/email";
 import { render } from "@react-email/render";
@@ -91,6 +91,15 @@ export default async function handler(
         }
         const userRecord = await getUser(req.body.uid);
         return res.status(200).json({ message: userRecord });
+      case "DELETE":
+        const { uid } = req.query;
+        if (uid) {
+          const ret = await deleteUser(uid as string);
+          return res.status(200).json({ data: ret });
+        } else {
+          return res.status(200).json({ data: "uid is required" });
+        }
+        
       default:
         return res.status(200).json({ message: req.method });
     }

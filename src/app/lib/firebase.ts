@@ -8,6 +8,7 @@ if (!admin.apps.length) {
     credential: admin.credential.cert(serviceAccount),
   });
 }
+// const db = admin.firestore();
 
 type UserInfo = {
   email?: string;
@@ -31,6 +32,10 @@ const createUser = async (user: UserInfo) => {
   return await getAuth().createUser(user);
 };
 
+const deleteUser = async (uid: string) => {
+  return await getAuth().deleteUser(uid);
+};
+
 const checkPhoneExistence = async (phone: string) => {
   try {
     let result = await getAuth().getUserByPhoneNumber(phone);
@@ -40,4 +45,10 @@ const checkPhoneExistence = async (phone: string) => {
   }
   
 }
-export { getUser, updateUser, createUser, checkPhoneExistence };
+export {
+  getUser,
+  updateUser,
+  createUser,
+  checkPhoneExistence,
+  deleteUser,
+};
