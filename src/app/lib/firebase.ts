@@ -43,12 +43,21 @@ const checkPhoneExistence = async (phone: string) => {
   } catch(err) {
     return false;
   }
-  
 }
+
+const checkEmailExistence = async (email: string) => {
+  try {
+    let result = await getAuth().getUserByEmail(email);
+    return result.uid ? true : false;
+  } catch (err) {
+    return false;
+  }
+};
 export {
   getUser,
   updateUser,
   createUser,
   checkPhoneExistence,
+  checkEmailExistence,
   deleteUser,
 };

@@ -1,5 +1,5 @@
 import type { NextApiRequest, NextApiResponse } from "next";
-import { updateUser, createUser, getUser, checkPhoneExistence, deleteUser } from "@/app/lib/firebase";
+import { updateUser, createUser, getUser, checkPhoneExistence, checkEmailExistence, deleteUser } from "@/app/lib/firebase";
 import MailTemplate from "@/app/emails/template";
 import { sendEmail } from "@/app/lib/email";
 import { render } from "@react-email/render";
@@ -87,7 +87,13 @@ export default async function handler(
         const {phoneNumber} = req.query;
         if (phoneNumber) {
           const result = await checkPhoneExistence(formatPhone(phoneNumber));
-          return res.status(200).json({ data: { existence: result }});
+          return res.status(200).json(result);
+        }
+
+        const { email } = req.query;
+        if (email) {
+          const result = await checkEmailExistence(email as string);
+          return res.status(200).json(result);
         }
         const userRecord = await getUser(req.body.uid);
         return res.status(200).json({ message: userRecord });
