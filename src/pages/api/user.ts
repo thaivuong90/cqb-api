@@ -87,13 +87,13 @@ export default async function handler(
         const {phoneNumber} = req.query;
         if (phoneNumber) {
           const result = await checkPhoneExistence(formatPhone(phoneNumber));
-          return res.status(200).json(result);
+          return res.status(200).json({ data: { existence: result }});
         }
 
         const { email } = req.query;
         if (email) {
           const result = await checkEmailExistence(email as string);
-          return res.status(200).json(result);
+          return res.status(200).json({ data: { existence: result } });
         }
         const userRecord = await getUser(req.body.uid);
         return res.status(200).json({ message: userRecord });
